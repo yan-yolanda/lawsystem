@@ -1,0 +1,394 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>法学研究选题平台</title>
+  <script src="./data.js"></script>
+  <style>
+    :root { --navy:#16365f; --blue:#2f69e1; --accent:#e86c3a; --panel:#fff; --ink:#10213c; --muted:#64748b; --line:rgba(148,163,184,.22); --shadow:0 18px 40px rgba(16,33,60,.10); }
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#f6f9fc,#edf3f8);color:var(--ink)}
+    .topbar{display:flex;justify-content:space-between;align-items:center;padding:18px 26px;background:linear-gradient(120deg,#123055,#22487c 62%,#2f69e1);color:#fff;position:sticky;top:0;z-index:10}
+    .topbar h1{margin:0;font-size:24px}.topbar p{margin:4px 0 0;color:rgba(255,255,255,.82);font-size:13px}.metric{padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.14)}
+    .layout{display:grid;grid-template-columns:460px 1fr;gap:22px;padding:22px;min-height:calc(100vh - 82px)} .panel{background:var(--panel);border-radius:24px;box-shadow:var(--shadow);overflow:hidden}
+    .left{display:flex;flex-direction:column}.head{padding:20px 22px 10px}.head h2{margin:0 0 8px}.tip{color:var(--muted);font-size:13px;line-height:1.6}
+    .conversation{flex:1;padding:0 22px 18px;overflow:auto;min-height:360px}.bubble{padding:14px 16px;border-radius:16px;margin:0 0 14px;line-height:1.6;max-width:92%}.system{background:#f8fbff;border:1px solid rgba(47,105,225,.14)}.user{margin-left:auto;background:#edf4ff}
+    .candidate-card{padding:14px;border-radius:16px;background:linear-gradient(180deg,rgba(232,108,58,.08),#fff);border:1px solid rgba(232,108,58,.18);margin-bottom:12px;cursor:pointer;transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease}.candidate-card:hover{transform:translateY(-1px)}.candidate-card.active{border-color:#e86c3a;box-shadow:0 12px 24px rgba(232,108,58,.16)}.candidate-card input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid rgba(148,163,184,.28);font:inherit}
+    .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.tag{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(15,23,42,.06);color:var(--muted)} button{border:0;border-radius:12px;font:inherit;cursor:pointer}
+    .composer{padding:16px 22px 22px;border-top:1px solid var(--line)} .composer textarea{width:100%;min-height:90px;resize:vertical;padding:12px;border-radius:14px;border:1px solid rgba(148,163,184,.28);font:inherit}
+    .actions{display:flex;justify-content:space-between;gap:12px;margin-top:12px}.ghost,.primary,.danger{padding:11px 14px}.ghost{background:#edf4ff;color:var(--navy)}.primary{background:linear-gradient(135deg,var(--accent),#f08a5d);color:#fff;font-weight:700}.danger{background:rgba(239,68,68,.10);color:#b91c1c}
+    .right{background:linear-gradient(180deg,#0d1b2a,#122338);color:#fff}.filters{padding:18px 20px 10px;border-bottom:1px solid rgba(255,255,255,.08)} .filters h2{margin:0 0 12px}.row{display:flex;gap:10px;flex-wrap:wrap}.filters select{padding:10px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:#fff}
+    .checks{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.check{font-size:12px;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.08)}
+    .viz-wrap{padding:14px 16px 18px}.viz-toolbar{display:flex;justify-content:space-between;align-items:center;color:rgba(255,255,255,.72);font-size:12px;margin-bottom:10px}.viz-frame{position:relative;background:radial-gradient(circle at top,rgba(47,105,225,.12),transparent 30%),rgba(255,255,255,.02);border-radius:18px;border:1px solid rgba(255,255,255,.06);padding:14px}
+    svg{display:block;width:100%;height:560px}.axis{stroke:rgba(255,255,255,.22);stroke-width:1}.grid{stroke:rgba(255,255,255,.08);stroke-width:1}.axis-label{fill:rgba(255,255,255,.68);font-size:12px}.point{cursor:pointer;transition:transform .15s ease}.point.active{filter:drop-shadow(0 0 12px rgba(232,108,58,.55))}.legend{display:flex;gap:16px;align-items:center}.legend span{display:inline-flex;align-items:center;gap:6px}.dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+    .tooltip{position:absolute;pointer-events:none;background:rgba(15,23,42,.94);color:#fff;padding:10px 12px;border-radius:12px;font-size:12px;line-height:1.5;max-width:240px;display:none;z-index:2}
+    .report{margin-top:16px;display:grid;gap:16px}.report-card{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px}.report-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:10px}.report-head h3{margin:0;font-size:16px}.report-head p{margin:0;color:rgba(255,255,255,.74);font-size:12px}.report-title{margin:0 0 10px;font-size:16px}.report-text{color:rgba(255,255,255,.78);font-size:13px;line-height:1.8}
+    .summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.summary-item{padding:12px;border-radius:14px;background:rgba(255,255,255,.05)}.summary-item span{display:block;color:rgba(255,255,255,.64);font-size:12px}.summary-item strong{display:block;margin-top:6px;font-size:22px}
+    .bar-list{display:grid;gap:10px}.bar-row{display:grid;grid-template-columns:88px 1fr 28px;gap:10px;align-items:center;font-size:12px;color:rgba(255,255,255,.76)}.bar-track{height:10px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}.bar-fill{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#69a7ff,#e86c3a)}
+    .keyword-cloud{display:flex;flex-wrap:wrap;gap:8px}.keyword-chip{padding:6px 10px;border-radius:999px;font-size:12px}.keyword-chip.overlap{background:rgba(47,105,225,.22);color:#d9e8ff}.keyword-chip.diff{background:rgba(232,108,58,.18);color:#ffe2d8}.keyword-chip.policy{background:rgba(34,197,94,.18);color:#d7ffe5}.keyword-chip.discipline{background:rgba(168,85,247,.20);color:#f0dcff}.keyword-chip.tech{background:rgba(56,189,248,.18);color:#d9f7ff}
+    .topic-report{display:grid;gap:12px}.topic-item{padding:14px;border-radius:16px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06)}.topic-item h4{margin:0 0 8px;font-size:15px;line-height:1.6}.topic-item p{margin:0 0 6px;color:rgba(255,255,255,.74);font-size:13px;line-height:1.7}
+    @media (max-width:1100px){.layout{grid-template-columns:1fr}.conversation{min-height:220px}svg{height:460px}.summary-grid{grid-template-columns:repeat(2,1fr)}}
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div><h1>法学研究选题平台</h1><p>候选课题生成、历史课题散点分布、详情对标与专家画像联动演示</p></div>
+    <div class="metric">历史课题样本 <strong id="topicMetric">0</strong></div>
+  </header>
+  <main class="layout">
+    <section class="panel left">
+      <div class="head"><h2>课题候选池</h2><div class="tip">输入多个法学选题，系统会自动拆分候选课题，并在右侧图谱中高亮。点击候选卡片或橙色点可切换单题分析，双击橙色点进入详情页。</div></div>
+      <div class="conversation" id="conversation"></div>
+      <div class="composer">
+        <textarea id="topicInput" placeholder="例如：平台算法歧视的司法救济研究；跨境数据流动中的涉外法治协同；认罪认罚案件证据标准优化"></textarea>
+        <div class="actions">
+          <button class="ghost" id="demoFill">填入示例</button>
+          <button class="primary" id="analyzeBtn">确认并开始分析</button>
+        </div>
+      </div>
+    </section>
+    <section class="panel right">
+      <div class="filters">
+        <h2>法学课题分布图谱</h2>
+        <div class="row"><select id="yearStart"></select><select id="yearEnd"></select></div>
+        <div class="checks" id="typeFilters"></div>
+      </div>
+      <div class="viz-wrap">
+        <div class="viz-toolbar"><div class="legend"><span><i class="dot" style="background:#69a7ff"></i>历史课题</span><span><i class="dot" style="background:#e86c3a"></i>候选课题</span></div><div>点击橙色点切换单题分析，双击进入详情页</div></div>
+        <div class="viz-frame">
+          <div class="tooltip" id="tooltip"></div>
+          <svg id="scatterSvg" viewBox="0 0 760 560" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="report">
+          <div class="report-card">
+            <div class="report-head"><h3 id="reportHeading">选题分析摘要</h3><p id="reportModeText">当前为全部候选题目的综合分析</p></div>
+            <div class="summary-grid" id="summaryGrid"></div>
+          </div>
+          <div class="report-card">
+            <h3 class="report-title" id="sectionTitleA">方向分布对比</h3>
+            <div class="bar-list" id="directionBars"></div>
+          </div>
+          <div class="report-card">
+            <h3 class="report-title" id="sectionTitleB">关键词交集与差异</h3>
+            <div class="report-text" id="keywordIntro"></div>
+            <div class="keyword-cloud" id="keywordCloud"></div>
+          </div>
+          <div class="report-card">
+            <h3 class="report-title" id="sectionTitleC">候选题目对标报告</h3>
+            <div class="topic-report" id="topicReport"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const { TOPICS, findSimilarTopics, inferDirectionFromTitle } = window.ResearchPlatformData;
+    const conversationEl = document.getElementById("conversation");
+    const topicInput = document.getElementById("topicInput");
+    const tooltip = document.getElementById("tooltip");
+    const svg = document.getElementById("scatterSvg");
+    const yearStart = document.getElementById("yearStart");
+    const yearEnd = document.getElementById("yearEnd");
+    const typeFilters = document.getElementById("typeFilters");
+    const summaryGrid = document.getElementById("summaryGrid");
+    const directionBars = document.getElementById("directionBars");
+    const keywordIntro = document.getElementById("keywordIntro");
+    const keywordCloud = document.getElementById("keywordCloud");
+    const topicReport = document.getElementById("topicReport");
+    const reportHeading = document.getElementById("reportHeading");
+    const reportModeText = document.getElementById("reportModeText");
+    const sectionTitleA = document.getElementById("sectionTitleA");
+    const sectionTitleB = document.getElementById("sectionTitleB");
+    const sectionTitleC = document.getElementById("sectionTitleC");
+    const allTypes = [...new Set(TOPICS.map((item) => item.type))];
+    const years = TOPICS.map((item) => item.year);
+    const state = { messages:[{ role:"system", content:"可输入多个法学研究设想。系统会自动拆分候选课题，并在散点图中映射位置。" }], candidates:[], startYear:Math.min(...years), endYear:Math.max(...years), types:new Set(allTypes), selectedCandidateId:null };
+
+    const POLICY_RULES = [
+      ["数据", ["数字中国建设整体布局规划", "“十四五”数字经济发展规划", "网络数据安全管理条例"]],
+      ["算法", ["互联网信息服务算法推荐管理规定", "新一代人工智能发展规划", "生成式人工智能服务管理暂行办法"]],
+      ["人工智能", ["生成式人工智能服务管理暂行办法", "新一代人工智能发展规划"]],
+      ["平台", ["关于平台经济领域的反垄断指南", "“十四五”市场监管现代化规划"]],
+      ["认罪认罚", ["关于适用认罪认罚从宽制度的指导意见", "法治中国建设规划（2020-2025年）"]],
+      ["刑事", ["法治中国建设规划（2020-2025年）", "“八五”普法规划"]],
+      ["证据", ["关于加强新时代检察机关法律监督工作的意见", "法治中国建设规划（2020-2025年）"]],
+      ["著作权", ["知识产权强国建设纲要（2021-2035年）", "“十四五”国家知识产权保护和运用规划"]],
+      ["专利", ["知识产权强国建设纲要（2021-2035年）", "“十四五”国家知识产权保护和运用规划"]],
+      ["商标", ["知识产权强国建设纲要（2021-2035年）"]],
+      ["涉外", ["关于加强新时代涉外法治工作的意见", "法治中国建设规划（2020-2025年）"]],
+      ["仲裁", ["关于完善仲裁制度提高仲裁公信力的若干意见", "关于加强新时代涉外法治工作的意见"]],
+      ["合规", ["关于建立涉案企业合规第三方监督评估机制的指导意见", "法治政府建设实施纲要（2021-2025年）"]],
+      ["行政", ["法治政府建设实施纲要（2021-2025年）", "“十四五”推进国家政务信息化规划"]],
+      ["复议", ["行政复议体制改革方案", "法治政府建设实施纲要（2021-2025年）"]],
+      ["劳动", ["“十四五”就业促进规划", "关于维护新就业形态劳动者劳动保障权益的指导意见"]],
+      ["用工", ["关于维护新就业形态劳动者劳动保障权益的指导意见", "“十四五”公共服务规划"]]
+    ];
+    const DISCIPLINE_RULES = {"数字法治":["法学","网络空间安全","公共管理","信息资源管理"],"刑事法治":["法学","公安学","社会学","国家安全学"],"民商法治":["法学","应用经济学","工商管理"],"知识产权法":["法学","管理科学与工程","新闻传播学"],"国际法治":["法学","国际关系","区域国别学","应用经济学"],"行政法治":["法学","公共管理","政治学"],"司法制度":["法学","纪检监察学","公共管理"],"社会治理法":["法学","社会学","劳动经济学","公共管理"]};
+    const TECH_RULES = [
+      ["数据", ["大数据治理", "数据确权", "隐私计算"]],
+      ["算法", ["算法推荐系统", "模型可解释性", "算法审计"]],
+      ["人工智能", ["生成式人工智能", "大语言模型", "内容审核"]],
+      ["平台", ["平台治理系统", "交易风控", "用户画像"]],
+      ["证据", ["电子取证", "司法区块链", "证据存证"]],
+      ["跨境", ["跨境数据流转", "合规审计系统", "数据分类分级"]],
+      ["专利", ["专利信息分析", "知识图谱", "技术情报挖掘"]],
+      ["著作权", ["数字水印", "内容识别", "版权追踪"]],
+      ["劳动", ["平台调度算法", "职业伤害监测", "灵活用工管理"]],
+      ["审判", ["类案检索", "裁判文书分析", "智慧法院"]],
+      ["行政", ["政务数据开放", "数字政府平台", "智能审批"]]
+    ];
+
+    document.getElementById("topicMetric").textContent = String(TOPICS.length);
+
+    function populateFilters() {
+      for (let year = state.startYear; year <= state.endYear; year += 1) {
+        yearStart.insertAdjacentHTML("beforeend", `<option value="${year}">${year} 年起</option>`);
+        yearEnd.insertAdjacentHTML("beforeend", `<option value="${year}">${year} 年止</option>`);
+      }
+      yearStart.value = String(state.startYear);
+      yearEnd.value = String(state.endYear);
+      typeFilters.innerHTML = allTypes.map((type) => `<label class="check"><input type="checkbox" value="${type}" checked> ${type}</label>`).join("");
+      yearStart.addEventListener("change", () => { state.startYear = Number(yearStart.value); if (state.startYear > state.endYear) { state.endYear = state.startYear; yearEnd.value = yearStart.value; } renderScatter(); });
+      yearEnd.addEventListener("change", () => { state.endYear = Number(yearEnd.value); if (state.endYear < state.startYear) { state.startYear = state.endYear; yearStart.value = yearEnd.value; } renderScatter(); });
+      typeFilters.querySelectorAll("input").forEach((input) => input.addEventListener("change", () => { input.checked ? state.types.add(input.value) : state.types.delete(input.value); renderScatter(); }));
+    }
+
+    function splitTopics(text) {
+      return text.split(/[；;。\n，,]/).map((item) => item.trim()).filter(Boolean).map((title, index) => {
+        const direction = inferDirectionFromTitle(title);
+        const similar = findSimilarTopics({ title, direction, keywords: [] }, 1)[0];
+        return { id:`candidate-${Date.now()}-${index}`, title, direction, type: similar ? similar.type : "候选课题", year: 2026, keywords: similar ? similar.keywords.slice(0, 4) : [direction, "法学研究"], x: similar ? Math.min(92, similar.x + 2 + index * 2) : 20 + index * 8, y: similar ? Math.max(10, similar.y - 3 - index * 2) : 60 - index * 8 };
+      });
+    }
+
+    function renderConversation() {
+      const html = state.messages.map((msg) => `<div class="bubble ${msg.role}">${msg.content}</div>`).join("") + (state.candidates.length ? state.candidates.map((candidate) => `
+        <div class="candidate-card ${state.selectedCandidateId === candidate.id ? "active" : ""}" data-card="${candidate.id}">
+          <input data-candidate="${candidate.id}" value="${candidate.title.replace(/"/g, '&quot;')}">
+          <div class="meta"><span class="tag">${candidate.direction}</span><span class="tag">${candidate.type}</span><button class="danger" data-remove="${candidate.id}">删除</button></div>
+        </div>`).join("") : `<div class="bubble system">候选池还没有内容。点击“填入示例”或输入你自己的法学选题即可。</div>`);
+      conversationEl.innerHTML = html;
+      conversationEl.querySelectorAll("[data-remove]").forEach((button) => button.addEventListener("click", (event) => {
+        event.stopPropagation();
+        state.candidates = state.candidates.filter((item) => item.id !== button.dataset.remove);
+        if (state.selectedCandidateId === button.dataset.remove) {
+          state.selectedCandidateId = state.candidates[0] ? state.candidates[0].id : null;
+        }
+        renderConversation();
+        renderScatter();
+      }));
+      conversationEl.querySelectorAll("[data-card]").forEach((card) => card.addEventListener("click", () => {
+        state.selectedCandidateId = state.selectedCandidateId === card.dataset.card ? null : card.dataset.card;
+        renderConversation();
+        renderScatter();
+      }));
+      conversationEl.querySelectorAll("[data-candidate]").forEach((input) => input.addEventListener("input", () => {
+        state.candidates = state.candidates.map((item) => item.id === input.dataset.candidate ? Object.assign({}, item, { title: input.value, direction: inferDirectionFromTitle(input.value) }) : item);
+        renderScatter();
+      }));
+      conversationEl.scrollTop = conversationEl.scrollHeight;
+    }
+
+    function colorForYear(year, minYear, maxYear) {
+      const ratio = (year - minYear) / Math.max(1, maxYear - minYear);
+      const r = Math.round(47 + ratio * (232 - 47));
+      const g = Math.round(105 + ratio * (108 - 105));
+      const b = Math.round(225 + ratio * (58 - 225));
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+
+    function getFilteredTopics() {
+      return TOPICS.filter((topic) => topic.year >= state.startYear && topic.year <= state.endYear && state.types.has(topic.type));
+    }
+
+    function getReportData() {
+      const filtered = getFilteredTopics();
+      const similarGroups = state.candidates.map((candidate) => ({ candidate, similar: findSimilarTopics(candidate, 3) }));
+      const overlapKeywords = [...new Set(similarGroups.flatMap((group) => group.similar.flatMap((topic) => topic.keywords.filter((keyword) => group.candidate.keywords.includes(keyword)))))] .slice(0, 10);
+      const diffKeywords = [...new Set(state.candidates.flatMap((candidate) => candidate.keywords.filter((keyword) => !overlapKeywords.includes(keyword))))].slice(0, 8);
+      const directionCounts = [...new Set(filtered.map((topic) => topic.direction))].map((direction) => ({ direction, historical: filtered.filter((topic) => topic.direction === direction).length, candidate: state.candidates.filter((topic) => topic.direction === direction).length })).filter((item) => item.historical > 0 || item.candidate > 0).sort((a, b) => b.candidate - a.candidate || b.historical - a.historical).slice(0, 6);
+      return { filtered, similarGroups, overlapKeywords, diffKeywords, directionCounts };
+    }
+
+    function inferPolicySet(candidate) {
+      const policies = new Set();
+      POLICY_RULES.forEach(([keyword, values]) => {
+        if (candidate.title.includes(keyword) || candidate.keywords.includes(keyword) || candidate.direction.includes(keyword)) {
+          values.forEach((value) => policies.add(value));
+        }
+      });
+      if (!policies.size) { policies.add("法治中国建设规划（2020-2025年）"); }
+      return [...policies].slice(0, 5);
+    }
+    function inferDisciplines(candidate) { return DISCIPLINE_RULES[candidate.direction] || ["法学", "公共管理"]; }
+    function inferTechnologies(candidate) {
+      const techs = new Set();
+      TECH_RULES.forEach(([keyword, values]) => {
+        if (candidate.title.includes(keyword) || candidate.keywords.includes(keyword)) { values.forEach((value) => techs.add(value)); }
+      });
+      if (!techs.size) { techs.add("案例数据库分析"); techs.add("法律文本挖掘"); }
+      return [...techs].slice(0, 5);
+    }
+
+    function renderEmptyReport() {
+      reportHeading.textContent = "选题分析摘要";
+      reportModeText.textContent = "当前为全部候选题目的综合分析";
+      sectionTitleA.textContent = "方向分布对比";
+      sectionTitleB.textContent = "关键词交集与差异";
+      sectionTitleC.textContent = "候选题目对标报告";
+      summaryGrid.innerHTML = `<div class="summary-item"><span>候选题目</span><strong>0</strong></div><div class="summary-item"><span>建议操作</span><strong>先录入</strong></div><div class="summary-item"><span>报告状态</span><strong>待生成</strong></div>`;
+      directionBars.innerHTML = `<div class="report-text">录入候选题目后，这里会自动生成方向分布对比。</div>`;
+      keywordIntro.textContent = "系统将在候选题目与历史课题之间提取关键词交集和差异词，帮助快速识别创新点与共性。";
+      keywordCloud.innerHTML = `<span class="keyword-chip overlap">待生成交集</span><span class="keyword-chip diff">待生成差异</span>`;
+      topicReport.innerHTML = `<div class="report-text">当前还没有候选题目，建议先输入 2-3 个法学选题设想，右侧将同步生成分析报告。</div>`;
+    }
+
+    function renderSingleCandidateReport(candidate) {
+      const similar = findSimilarTopics(candidate, 5);
+      const topMatch = similar[0];
+      const overlap = topMatch ? candidate.keywords.filter((keyword) => topMatch.keywords.includes(keyword)).slice(0, 5) : [];
+      const uniqueKeywords = candidate.keywords.filter((keyword) => !overlap.includes(keyword)).slice(0, 5);
+      const relatedPolicies = inferPolicySet(candidate);
+      const disciplines = inferDisciplines(candidate);
+      const technologies = inferTechnologies(candidate);
+      const directionTopics = TOPICS.filter((topic) => topic.direction === candidate.direction);
+      const recentTopics = directionTopics.filter((topic) => topic.year >= 2021).length;
+
+      reportHeading.textContent = "单题分析摘要";
+      reportModeText.textContent = `当前为候选课题“${candidate.title}”的专项分析`;
+      sectionTitleA.textContent = "政策、学科与技术映射";
+      sectionTitleB.textContent = "单题关键词分析";
+      sectionTitleC.textContent = "单题对标报告";
+
+      summaryGrid.innerHTML = `
+        <div class="summary-item"><span>所属方向</span><strong>${candidate.direction}</strong></div>
+        <div class="summary-item"><span>最高贴近度</span><strong>${topMatch ? Math.round(topMatch.similarity * 100) : 0}%</strong></div>
+        <div class="summary-item"><span>方向样本量</span><strong>${directionTopics.length}</strong></div>
+        <div class="summary-item"><span>近年热度</span><strong>${recentTopics}</strong></div>
+        <div class="summary-item"><span>政策关联</span><strong>${relatedPolicies.length}</strong></div>
+        <div class="summary-item"><span>技术要素</span><strong>${technologies.length}</strong></div>
+      `;
+
+      directionBars.innerHTML = `
+        <div class="report-text">该题目当前落在“${candidate.direction}”方向，和历史样本中同方向课题相比，更接近“${topMatch ? topMatch.title : "暂无明确匹配"}”。下方列出该题目需要重点关注的政策、学科与技术维度。</div>
+        <div class="keyword-cloud">
+          ${relatedPolicies.map((item) => `<span class="keyword-chip policy">${item}</span>`).join("")}
+          ${disciplines.map((item) => `<span class="keyword-chip discipline">${item}</span>`).join("")}
+          ${technologies.map((item) => `<span class="keyword-chip tech">${item}</span>`).join("")}
+        </div>
+      `;
+
+      keywordIntro.textContent = "蓝色标签表示与历史课题的共性关键词，橙色标签表示当前候选题目更突出的差异词，可用来判断该题目是偏稳健还是偏创新。";
+      keywordCloud.innerHTML = overlap.map((word) => `<span class="keyword-chip overlap">${word}</span>`).join("") + uniqueKeywords.map((word) => `<span class="keyword-chip diff">${word}</span>`).join("");
+
+      topicReport.innerHTML = `
+        <article class="topic-item">
+          <h4>${candidate.title}</h4>
+          <p>最接近历史课题：${topMatch ? `${topMatch.title}（${Math.round(topMatch.similarity * 100)}%）` : "暂无明显匹配"}。</p>
+          <p>相关国家政策：${relatedPolicies.join("、")}。</p>
+          <p>涉及学科：${disciplines.join("、")}。这说明该题目不仅属于法学内部研究，也适合与治理、社会科学或技术研究结合。</p>
+          <p>涉及技术：${technologies.join("、")}。这些技术既可能是治理对象，也可以成为研究工具、制度场景或证据载体。</p>
+          <p>与历史课题的共性：${overlap.length ? overlap.join("、") : "当前共性关键词较少，说明题目表达更偏新议题或仍需补充法学核心术语"}。</p>
+          <p>与历史课题的差异：${uniqueKeywords.length ? uniqueKeywords.join("、") : "当前表述较稳健，创新点更多体现在问题组合方式而非关键词本身"}。</p>
+        </article>
+      `;
+    }
+
+    function renderAggregateReport() {
+      const { filtered, similarGroups, overlapKeywords, diffKeywords, directionCounts } = getReportData();
+      const avgSimilarity = similarGroups.reduce((sum, group) => sum + ((group.similar[0] && group.similar[0].similarity) || 0), 0) / Math.max(1, similarGroups.length);
+      const focusedDirections = [...new Set(state.candidates.map((item) => item.direction))].length;
+      const innovationLevel = diffKeywords.length >= overlapKeywords.length ? "偏创新" : "偏稳健";
+      reportHeading.textContent = "选题分析摘要";
+      reportModeText.textContent = "当前为全部候选题目的综合分析";
+      sectionTitleA.textContent = "方向分布对比";
+      sectionTitleB.textContent = "关键词交集与差异";
+      sectionTitleC.textContent = "候选题目对标报告";
+      summaryGrid.innerHTML = `
+        <div class="summary-item"><span>候选题目</span><strong>${state.candidates.length}</strong></div>
+        <div class="summary-item"><span>平均贴近度</span><strong>${Math.round(avgSimilarity * 100)}%</strong></div>
+        <div class="summary-item"><span>选题风格</span><strong>${innovationLevel}</strong></div>
+        <div class="summary-item"><span>覆盖方向</span><strong>${focusedDirections}</strong></div>
+        <div class="summary-item"><span>对比样本</span><strong>${filtered.length}</strong></div>
+        <div class="summary-item"><span>建议下一步</span><strong>${avgSimilarity > 0.35 ? "可深化论证" : "继续收敛"}</strong></div>
+      `;
+      const maxCount = Math.max(1, ...directionCounts.map((item) => Math.max(item.historical, item.candidate)));
+      directionBars.innerHTML = directionCounts.map((item) => `<div class="bar-row"><span>${item.direction}</span><div class="bar-track"><span class="bar-fill" style="width:${Math.round((item.candidate / maxCount) * 100)}%"></span></div><strong>${item.candidate}</strong></div>`).join("") + `<div class="report-text">上方橙色长度表示候选题目在各法学方向上的集中程度。若某一方向候选数偏多，可点击对应题目切换到单题分析，查看更细的政策与技术映射。</div>`;
+      keywordIntro.textContent = `系统识别出 ${overlapKeywords.length} 个与历史课题重合的高频词，以及 ${diffKeywords.length} 个更偏候选题目自身的新词。重合词越多，说明选题越稳健；差异词越多，说明表达更有新意。`;
+      keywordCloud.innerHTML = overlapKeywords.map((word) => `<span class="keyword-chip overlap">${word}</span>`).join("") + diffKeywords.map((word) => `<span class="keyword-chip diff">${word}</span>`).join("");
+      topicReport.innerHTML = similarGroups.map((group) => { const topMatch = group.similar[0]; const overlap = topMatch ? group.candidate.keywords.filter((keyword) => topMatch.keywords.includes(keyword)).slice(0, 4) : []; const candidateUnique = group.candidate.keywords.filter((keyword) => !overlap.includes(keyword)).slice(0, 3); return `<article class="topic-item"><h4>${group.candidate.title}</h4><p>最接近历史课题：${topMatch ? topMatch.title : "暂无明显匹配"}${topMatch ? `（${Math.round(topMatch.similarity * 100)}%）` : ""}</p><p>共性特征：${overlap.length ? overlap.join("、") : "当前表达与历史样本交集较少，建议补充更明确的法学问题意识"}。</p><p>差异亮点：${candidateUnique.length ? candidateUnique.join("、") : "当前关键词主要沿用既有表达，可补充场景、对象或制度创新点"}。</p></article>`; }).join("");
+    }
+
+    function renderReport() {
+      if (!state.candidates.length) { renderEmptyReport(); return; }
+      const selectedCandidate = state.candidates.find((item) => item.id === state.selectedCandidateId);
+      if (selectedCandidate) { renderSingleCandidateReport(selectedCandidate); return; }
+      renderAggregateReport();
+    }
+
+    function renderScatter() {
+      const padding = { left: 52, right: 18, top: 18, bottom: 46 };
+      const width = 760;
+      const height = 560;
+      const filtered = getFilteredTopics();
+      const project = (x, y) => ({ x: padding.left + (x / 100) * (width - padding.left - padding.right), y: height - padding.bottom - (y / 100) * (height - padding.top - padding.bottom) });
+      let markup = "";
+      for (let i = 0; i <= 5; i += 1) {
+        const gx = padding.left + ((width - padding.left - padding.right) / 5) * i;
+        const gy = padding.top + ((height - padding.top - padding.bottom) / 5) * i;
+        markup += `<line class="grid" x1="${gx}" y1="${padding.top}" x2="${gx}" y2="${height - padding.bottom}"></line>`;
+        markup += `<line class="grid" x1="${padding.left}" y1="${gy}" x2="${width - padding.right}" y2="${gy}"></line>`;
+      }
+      markup += `<line class="axis" x1="${padding.left}" y1="${height - padding.bottom}" x2="${width - padding.right}" y2="${height - padding.bottom}"></line>`;
+      markup += `<line class="axis" x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${height - padding.bottom}"></line>`;
+      markup += `<text class="axis-label" x="${width / 2}" y="${height - 10}" text-anchor="middle">规范研究密度</text>`;
+      markup += `<text class="axis-label" x="18" y="${height / 2}" transform="rotate(-90 18 ${height / 2})" text-anchor="middle">实践关联强度</text>`;
+      filtered.forEach((topic) => {
+        const p = project(topic.x, topic.y);
+        markup += `<circle class="point history" cx="${p.x}" cy="${p.y}" r="6" fill="${colorForYear(topic.year, state.startYear, state.endYear)}" data-kind="history" data-title="${topic.title}" data-direction="${topic.direction}" data-year="${topic.year}" data-type="${topic.type}"></circle>`;
+      });
+      state.candidates.forEach((topic) => {
+        const p = project(topic.x, topic.y);
+        markup += `<circle class="point candidate ${state.selectedCandidateId === topic.id ? "active" : ""}" cx="${p.x}" cy="${p.y}" r="${state.selectedCandidateId === topic.id ? 11 : 9}" fill="#e86c3a" stroke="#ffd9cc" stroke-width="2" data-id="${topic.id}" data-kind="candidate" data-title="${topic.title}" data-direction="${topic.direction}" data-year="${topic.year}" data-type="${topic.type}"></circle>`;
+      });
+      svg.innerHTML = markup;
+      svg.querySelectorAll(".point").forEach((point) => {
+        point.addEventListener("mousemove", (event) => {
+          tooltip.style.display = "block";
+          tooltip.style.left = event.offsetX + 20 + "px";
+          tooltip.style.top = event.offsetY + 20 + "px";
+          tooltip.innerHTML = `<strong>${point.dataset.title}</strong><br>${point.dataset.direction}<br>${point.dataset.year} / ${point.dataset.type}${point.dataset.kind === 'candidate' ? '<br>点击切换单题分析 / 双击进入详情页' : ''}`;
+        });
+        point.addEventListener("mouseleave", () => { tooltip.style.display = "none"; });
+        point.addEventListener("click", () => {
+          if (point.dataset.kind === "candidate") {
+            state.selectedCandidateId = state.selectedCandidateId === point.dataset.id ? null : point.dataset.id;
+            renderConversation();
+            renderScatter();
+          }
+        });
+        point.addEventListener("dblclick", () => { if (point.dataset.kind === "candidate") { window.location.href = `./detail.html?title=${encodeURIComponent(point.dataset.title)}`; } });
+      });
+      renderReport();
+    }
+
+    document.getElementById("demoFill").addEventListener("click", () => { topicInput.value = "平台算法歧视的司法救济研究；跨境数据流动中的涉外法治协同；认罪认罚案件证据标准优化"; });
+    document.getElementById("analyzeBtn").addEventListener("click", () => {
+      const raw = topicInput.value.trim();
+      if (!raw) { state.messages.push({ role:"system", content:"请先输入至少一个法学选题。" }); renderConversation(); return; }
+      const candidates = splitTopics(raw);
+      state.messages.push({ role:"user", content: raw.replace(/\n/g, "<br>") });
+      state.messages.push({ role:"system", content: `已识别 ${candidates.length} 个候选课题，并完成图谱定位。你可以点击左侧候选卡片或右侧橙色点查看单题分析，双击橙色点进入详情页。` });
+      state.candidates = state.candidates.concat(candidates);
+      state.selectedCandidateId = candidates[0] ? candidates[0].id : state.selectedCandidateId;
+      topicInput.value = "";
+      renderConversation();
+      renderScatter();
+    });
+
+    populateFilters();
+    renderConversation();
+    renderScatter();
+  </script>
+</body>
+</html>

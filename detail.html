@@ -1,0 +1,44 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>课题详情分析</title>
+  <script src="./data.js"></script>
+  <style>
+    :root{--navy:#16365f;--blue:#2f69e1;--accent:#e86c3a;--ink:#10213c;--muted:#64748b;--panel:#fff;--shadow:0 18px 40px rgba(16,33,60,.10)}
+    *{box-sizing:border-box}body{margin:0;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:linear-gradient(180deg,#f6f9fc,#edf3f8);color:var(--ink)}
+    .hero{padding:28px 24px 34px;background:linear-gradient(120deg,#123055,#22487c 62%,#2f69e1);color:#fff}.nav{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}.nav a{color:#fff;text-decoration:none;padding:10px 14px;border-radius:999px;background:rgba(255,255,255,.12)}
+    .hero h1{margin:0 0 10px;font-size:clamp(28px,4vw,42px);line-height:1.3;max-width:920px}.hero p{margin:0;max-width:860px;line-height:1.8;color:rgba(255,255,255,.84)}
+    .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:22px}.card{background:var(--panel);border-radius:24px;box-shadow:var(--shadow);padding:22px}.card h2{margin:0 0 14px}.item{padding:16px;border-radius:16px;background:#f8fbff;border:1px solid rgba(47,105,225,.10);margin-bottom:14px}.item h3{margin:0 0 10px;font-size:16px;line-height:1.5}.meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}.pill{font-size:12px;padding:4px 8px;border-radius:999px;background:rgba(47,105,225,.10);color:var(--navy)}.pill.score{background:rgba(232,108,58,.14);color:#b45309}.bar{height:8px;background:rgba(148,163,184,.18);border-radius:999px;overflow:hidden;margin-top:10px}.bar span{display:block;height:100%;background:linear-gradient(90deg,var(--blue),var(--accent))}
+    .expert{display:flex;gap:14px}.avatar{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#123055,#2f69e1);color:#fff;font-weight:700;flex:none}.expert a{display:inline-block;margin-top:10px;padding:8px 12px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#f08a5d);color:#fff;text-decoration:none}
+    @media (max-width:1024px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <div class="nav"><a href="./workbench.html">返回主工作台</a><span id="crumb">法学课题详情分析</span></div>
+    <h1 id="title">课题详情</h1>
+    <p id="summary"></p>
+  </header>
+  <main class="grid">
+    <section class="card"><h2>相似历史课题</h2><div id="similarList"></div></section>
+    <section class="card"><h2>推荐项目负责人</h2><div id="leadList"></div></section>
+    <section class="card"><h2>推荐评审专家</h2><div id="reviewerList"></div></section>
+  </main>
+  <script>
+    const { getTopicByTitle, findSimilarTopics, recommendExperts, inferDirectionFromTitle } = window.ResearchPlatformData;
+    const title = new URLSearchParams(window.location.search).get("title") || "平台算法歧视的司法救济研究";
+    const existingTopic = getTopicByTitle(title);
+    const queryTopic = existingTopic || { title, direction: inferDirectionFromTitle(title), keywords:[inferDirectionFromTitle(title), "法学研究", "制度完善"] };
+    const similarTopics = findSimilarTopics(queryTopic, 5).filter((topic) => topic.title !== title);
+    const experts = recommendExperts(queryTopic, 5);
+    document.getElementById("title").textContent = title;
+    document.getElementById("crumb").textContent = queryTopic.direction + " / 课题详情";
+    document.getElementById("summary").textContent = `系统已根据“${queryTopic.direction}”方向完成历史课题、潜在负责人和评审专家的匹配，可用于立项论证与团队配置演示。`;
+    document.getElementById("similarList").innerHTML = similarTopics.map((topic) => `<article class="item"><h3>${topic.title}</h3><div class="meta"><span class="pill">${topic.year} 年</span><span class="pill">${topic.type}</span><span class="pill">${topic.direction}</span><span class="pill score">相似度 ${Math.round(topic.similarity * 100)}%</span></div><div>关键词：${topic.keywords.slice(0,4).join(" / ")}</div><div class="bar"><span style="width:${Math.round(topic.similarity * 100)}%"></span></div></article>`).join("");
+    document.getElementById("leadList").innerHTML = experts.slice(0,3).map((expert) => `<article class="item expert"><div class="avatar">${expert.name.slice(0,1)}</div><div><h3>${expert.name}</h3><div>${expert.institution} · ${expert.title}</div><div class="meta">${expert.directions.map((direction) => `<span class="pill">${direction}</span>`).join("")}<span class="pill score">匹配度 ${Math.round(expert.score * 100)}%</span></div><div>匹配说明：与本课题方向重合度高，并参与过多个相关法学项目。</div><div class="bar"><span style="width:${Math.round(expert.score * 100)}%"></span></div><a href="./expert.html?name=${encodeURIComponent(expert.name)}">查看专家画像</a></div></article>`).join("");
+    document.getElementById("reviewerList").innerHTML = experts.map((expert) => `<article class="item expert"><div class="avatar">${expert.name.slice(0,1)}</div><div><h3>${expert.name}</h3><div>${expert.institution}</div><div class="meta">${expert.directions.map((direction) => `<span class="pill">${direction}</span>`).join("")}</div><div>评审建议：重点关注其在${expert.directions[0] || "法学交叉研究"}方向的规范研究与实践评估经验。</div><a href="./expert.html?name=${encodeURIComponent(expert.name)}">查看专家画像</a></div></article>`).join("");
+  </script>
+</body>
+</html>
